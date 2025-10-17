@@ -1,0 +1,17 @@
+body {
+  background: #222;
+  color: #0FF;
+  font-family: 'Press Start 2P', cursive;
+  text-align: center;
+  margin-top: 80px;
+}
+#respuesta {
+  margin-top: 32px;
+  color: #FFD700;
+  font-size: 1.2em;
+}
+input, button {
+  margin-top: 16px;
+  font-size: 1em;
+  font-family: 'Press Start 2P', cursive;
+}
