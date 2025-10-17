@@ -1,1 +1,0 @@
-# SalvandoOtare_Bot
