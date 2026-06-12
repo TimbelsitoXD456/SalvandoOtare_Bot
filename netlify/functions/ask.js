@@ -15,22 +15,12 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // 🔍 LISTAR MODELOS DISPONIBLES
-  try {
-    console.log('🔍 Listando modelos disponibles...');
-    const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`);
-    const models = await modelsResponse.json();
-    console.log('📋 Modelos disponibles:', JSON.stringify(models, null, 2));
-  } catch (error) {
-    console.error('⚠️ Error al listar modelos:', error);
-  }
-
   const prompt = pregunta || "Dame una respuesta útil para la comunidad.";
   console.log('💬 Prompt a enviar:', prompt);
 
   try {
-    console.log('🌐 Enviando solicitud a Gemini API v1beta con modelo gemini-1.5-pro...');
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}`, {
+    console.log('🌐 Enviando solicitud a Gemini API v1beta con modelo gemini-2.5-flash...');
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
