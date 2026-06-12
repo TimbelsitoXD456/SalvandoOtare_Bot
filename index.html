@@ -1,18 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>IA Ayuda SalvandoOtare</title>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IA Ayuda SalvandoOtare</title>
   <link href="style.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>¿En qué te puedo ayudar?</h1>
-  <input id="pregunta" type="text" placeholder="Escribe tu duda aquí..." size="40" />
-  <br>
-  <button onclick="preguntar()">Preguntar</button>
-  <div id="respuesta"></div>
+  <div class="container">
+    <div class="chat-header">
+      <div class="header-content">
+        <div class="bot-avatar">🤖</div>
+        <div class="header-info">
+          <h1>SalvandoOtare Bot</h1>
+          <p>Siempre disponible para ayudarte</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="message bot-message">
+        <div class="message-content">
+          <p>¡Hola! 👋 Soy el Bot de SalvandoOtare. ¿En qué puedo ayudarte hoy?</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <div class="input-wrapper">
+        <input 
+          id="pregunta" 
+          type="text" 
+          class="chat-input" 
+          placeholder="Escribe tu pregunta aquí..." 
+          autocomplete="off"
+        />
+        <button class="send-btn" onclick="preguntar()">
+          <span>📤</span>
+        </button>
+      </div>
+      <p class="footer-text">Powered by Gemini 2.5 Flash</p>
+    </div>
+  </div>
+
   <script src="main.js"></script>
 </body>
-
 </html>
