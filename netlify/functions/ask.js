@@ -51,7 +51,7 @@ Salvando Otare es un juego de acción 2D donde dos héroes, Lanzziano y Jhoabxi,
    - Parry: S (refleja disparos 2 segundos, invulnerable)
 
 **MECÁNICAS PRINCIPALES:**
-- DASH: Avance rápido horizontal. Te vuelve invulnerable por 0.2 segundos. Cooldown: 0.7 segundos.
+- DASH: Avance rápido horizontal. Te vuelves invulnerable por 0.2 segundos. Cooldown: 0.7 segundos.
 - PARRY: Te vuelves invulnerable por 2 segundos. Refleja golpes/balas hacia enemigos cercanos.
 - REGENERACIÓN: Los jugadores recuperan 5 vida cada 200ms si no están en combate activo.
 - MONTAJE: Un jugador puede montarse sobre otro para acceder a áreas altas.
@@ -120,8 +120,8 @@ Salvando Otare es un juego de acción 2D donde dos héroes, Lanzziano y Jhoabxi,
 
 FORMATO DE RESPUESTAS:
 - Para tutoriales: Usa numeración clara (1. 2. 3.)
-- Para tips: Usa emojis relevantes (💪🛡️⚡🔥etc)
-- Para estrategias: Contextualiază según nivel/modo de juego
+- Para tips: Usa emojis relevantes (💪🛡️⚡🔥 etc)
+- Para estrategias: Contextualizia según nivel/modo de juego
 - Para errores: Sugiere soluciones paso a paso
 
 ¡Ahora responde la pregunta del jugador como L.O, tu IA experta en Salvando Otare!`;
@@ -137,20 +137,12 @@ FORMATO DE RESPUESTAS:
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        system: [
-          {
-            parts: [
-              {
-                text: systemPrompt
-              }
-            ]
-          }
-        ],
         contents: [
           {
+            role: "user",
             parts: [
               {
-                text: prompt
+                text: systemPrompt + "\n\n---\n\nPregunta del usuario: " + prompt
               }
             ]
           }
