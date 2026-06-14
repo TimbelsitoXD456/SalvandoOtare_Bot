@@ -1,9 +1,10 @@
 exports.handler = async function(event, context) {
   console.log('📨 Solicitud recibida:', event);
   
-  const { pregunta, modelo } = JSON.parse(event.body || '{}');
+  const { pregunta, modelo, modo } = JSON.parse(event.body || '{}');
   console.log('❓ Pregunta del usuario:', pregunta);
   console.log('🔧 Modelo seleccionado:', modelo);
+  console.log('🎯 Modo de IA:', modo);
   
   const GEMINI_API_KEY = process.env.GEMINI_API_KEYY;
   console.log('🔑 API Key cargada:', GEMINI_API_KEY ? '✓ Disponible' : '✗ No disponible');
@@ -28,8 +29,11 @@ exports.handler = async function(event, context) {
     };
   }
 
-  // ===== SYSTEM PROMPT PARA L.O =====
-  const systemPrompt = `Eres L.O, una IA experta y amigable especializada en el juego "Salvando Otare". Tu misión es ayudar a los jugadores con tutoriales, estrategias, tips y responder todas sus preguntas sobre el juego.
+  // ===== SYSTEM PROMPTS SEGÚN EL MODO =====
+  let systemPrompt = '';
+
+  if (modo === 'salvandootare') {
+    systemPrompt = `Eres L.O, una IA experta y amigable especializada en el juego "Salvando Otare". Tu misión es ayudar a los jugadores con tutoriales, estrategias, tips y responder todas sus preguntas sobre el juego.
 
 INFORMACIÓN SOBRE SALVANDO OTARE:
 =====================================
@@ -125,8 +129,27 @@ FORMATO DE RESPUESTAS:
 - Para errores: Sugiere soluciones paso a paso
 
 ¡Ahora responde la pregunta del jugador como L.O, tu IA experta en Salvando Otare!`;
+  } else {
+    // Modo General
+    systemPrompt = `Eres un asistente de IA inteligente, amable y útil. Puedes ayudar con cualquier tema: programación, educación, análisis, creatividad, preguntas generales, etc.
 
-  const prompt = pregunta || "Dame una respuesta útil para la comunidad.";
+**CARACTERÍSTICAS:**
+- Respuestas claras y bien estructuradas
+- Explicas conceptos de forma accesible
+- Ofreces ejemplos cuando es relevante
+- Admites cuando no sabes algo
+- Siempre mantienes un tono profesional y amigable
+
+**FORMATO DE RESPUESTAS:**
+- Usa numeración para listas
+- Destaca puntos importantes con **negrita**
+- Secciones bien organizadas
+- Emojis cuando sea apropiado para mejorar claridad
+
+¡Ahora responde la pregunta del usuario de manera útil y clara!`;
+  }
+
+  const prompt = pregunta || "Hola, ¿cómo estás?";
   console.log('💬 Prompt a enviar:', prompt);
 
   try {
@@ -182,7 +205,7 @@ FORMATO DE RESPUESTAS:
     console.log('🎯 Enviando respuesta al cliente...');
     return {
       statusCode: 200,
-      body: JSON.stringify({ respuesta, modelo: modeloValido })
+      body: JSON.stringify({ respuesta, modelo: modeloValido, modo: modo })
     };
   } catch (error) {
     console.error('💥 Error en la función:', error);
