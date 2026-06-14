@@ -49,7 +49,7 @@ exports.handler = async function(event, context) {
           }
         ],
         generationConfig: {
-          maxOutputTokens: 150
+          maxOutputTokens: 2048
         }
       })
     });
