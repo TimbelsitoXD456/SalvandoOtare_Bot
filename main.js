@@ -19,11 +19,16 @@ async function preguntar() {
   agregarIndicadorEscritura();
   
   try {
+    // Obtener el modelo seleccionado
+    const modelSelector = document.getElementById('geminiModel');
+    const modelo = modelSelector ? modelSelector.value : 'gemini-2.5-flash';
+    console.log('🔧 Modelo seleccionado:', modelo);
+    
     console.log('🌐 Enviando fetch a /.netlify/functions/ask');
     const res = await fetch('/.netlify/functions/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pregunta })
+      body: JSON.stringify({ pregunta, modelo })
     });
     
     console.log('📡 Estado de respuesta:', res.status, res.statusText);
