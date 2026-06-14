@@ -1,8 +1,9 @@
 exports.handler = async function(event, context) {
   console.log('📨 Solicitud recibida:', event);
   
-  const { pregunta } = JSON.parse(event.body || '{}');
+  const { pregunta, modelo } = JSON.parse(event.body || '{}');
   console.log('❓ Pregunta del usuario:', pregunta);
+  console.log('🔧 Modelo seleccionado:', modelo);
   
   const GEMINI_API_KEY = process.env.GEMINI_API_KEYY;
   console.log('🔑 API Key cargada:', GEMINI_API_KEY ? '✓ Disponible' : '✗ No disponible');
@@ -15,12 +16,24 @@ exports.handler = async function(event, context) {
     };
   }
 
+  // Validar modelo
+  const modeloValido = modelo || 'gemini-2.5-flash';
+  const modelosPermitidos = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
+  
+  if (!modelosPermitidos.includes(modeloValido)) {
+    console.error('❌ ERROR: Modelo no permitido:', modeloValido);
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Modelo no permitido", respuesta: "El modelo seleccionado no es válido." })
+    };
+  }
+
   const prompt = pregunta || "Dame una respuesta útil para la comunidad.";
   console.log('💬 Prompt a enviar:', prompt);
 
   try {
-    console.log('🌐 Enviando solicitud a Gemini API v1beta con modelo gemini-2.5-flash...');
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    console.log(`🌐 Enviando solicitud a Gemini API v1beta con modelo ${modeloValido}...`);
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modeloValido}:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -70,7 +83,7 @@ exports.handler = async function(event, context) {
     console.log('🎯 Enviando respuesta al cliente...');
     return {
       statusCode: 200,
-      body: JSON.stringify({ respuesta })
+      body: JSON.stringify({ respuesta, modelo: modeloValido })
     };
   } catch (error) {
     console.error('💥 Error en la función:', error);
