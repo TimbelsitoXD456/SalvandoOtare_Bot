@@ -24,11 +24,16 @@ async function preguntar() {
     const modelo = modelSelector ? modelSelector.value : 'gemini-2.5-flash';
     console.log('🔧 Modelo seleccionado:', modelo);
     
+    // Obtener el modo de IA seleccionado
+    const modoSelector = document.getElementById('modoIA');
+    const modo = modoSelector ? modoSelector.value : 'salvandootare';
+    console.log('🎯 Modo de IA seleccionado:', modo);
+    
     console.log('🌐 Enviando fetch a /.netlify/functions/ask');
     const res = await fetch('/.netlify/functions/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pregunta, modelo })
+      body: JSON.stringify({ pregunta, modelo, modo })
     });
     
     console.log('📡 Estado de respuesta:', res.status, res.statusText);
@@ -68,17 +73,19 @@ function convertirMarkdownAHTML(texto) {
   // **texto** -> <strong>texto</strong>
   texto = texto.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   
-  // *texto* -> <em>texto</em>
-  texto = texto.replace(/\*(.+?)\*/g, '<em>$1</em>');
-  
   // __texto__ -> <strong>texto</strong>
   texto = texto.replace(/__(.+?)__/g, '<strong>$1</strong>');
+  
+  // *texto* -> <em>texto</em> (después de ** para evitar conflictos)
+  texto = texto.replace(/\*(.+?)\*/g, '<em>$1</em>');
   
   // _texto_ -> <em>texto</em>
   texto = texto.replace(/_(.+?)_/g, '<em>$1</em>');
   
-  // # Título -> <h1>Título</h1>
+  // # Título -> <h2>Título</h2>
   texto = texto.replace(/^# (.+)$/gm, '<h2 style="margin-top: 12px; color: #FFD700;">$1</h2>');
+  
+  // ## Subtítulo -> <h3>Subtítulo</h3>
   texto = texto.replace(/^## (.+)$/gm, '<h3 style="color: #0FF;">$1</h3>');
   
   // Saltos de línea \n -> <br>
