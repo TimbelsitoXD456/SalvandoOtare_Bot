@@ -75,7 +75,7 @@ function convertirMarkdownAHTML(texto) {
   texto = texto.replace(/__(.+?)__/g, '<strong>$1</strong>');
   
   // _texto_ -> <em>texto</em>
-  texto = texto.replace(/_(.+?)_/g, <em>$1</em>');
+  texto = texto.replace(/_(.+?)_/g, '<em>$1</em>');
   
   // # Título -> <h1>Título</h1>
   texto = texto.replace(/^# (.+)$/gm, '<h2 style="margin-top: 12px; color: #FFD700;">$1</h2>');
