@@ -46,11 +46,14 @@ async function preguntar() {
     const data = await res.json();
     console.log('✅ Datos recibidos:', data);
     
-    const respuestaTexto = data.respuesta || "No se pudo obtener respuesta.";
-    console.log('💬 Respuesta final:', respuestaTexto);
+    let respuestaTexto = data.respuesta || "No se pudo obtener respuesta.";
+    console.log('💬 Respuesta final (sin procesar):', respuestaTexto);
+    
+    // === CONVERTIR MARKDOWN A HTML ===
+    respuestaTexto = convertirMarkdownAHTML(respuestaTexto);
     
     console.log('🎨 Agregando respuesta al chat...');
-    agregarMensaje(respuestaTexto, 'bot');
+    agregarMensaje(respuestaTexto, 'bot', true); // true = es HTML
     
     console.log('🎉 Proceso completado exitosamente');
   } catch (error) {
@@ -60,7 +63,31 @@ async function preguntar() {
   }
 }
 
-function agregarMensaje(texto, tipo) {
+// === NUEVA FUNCIÓN: Convertir Markdown a HTML ===
+function convertirMarkdownAHTML(texto) {
+  // **texto** -> <strong>texto</strong>
+  texto = texto.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  
+  // *texto* -> <em>texto</em>
+  texto = texto.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  
+  // __texto__ -> <strong>texto</strong>
+  texto = texto.replace(/__(.+?)__/g, '<strong>$1</strong>');
+  
+  // _texto_ -> <em>texto</em>
+  texto = texto.replace(/_(.+?)_/g, <em>$1</em>');
+  
+  // # Título -> <h1>Título</h1>
+  texto = texto.replace(/^# (.+)$/gm, '<h2 style="margin-top: 12px; color: #FFD700;">$1</h2>');
+  texto = texto.replace(/^## (.+)$/gm, '<h3 style="color: #0FF;">$1</h3>');
+  
+  // Saltos de línea \n -> <br>
+  texto = texto.replace(/\n/g, '<br>');
+  
+  return texto;
+}
+
+function agregarMensaje(texto, tipo, esHTML = false) {
   const chatMessages = document.getElementById('chatMessages');
   
   const messageDiv = document.createElement('div');
@@ -70,7 +97,13 @@ function agregarMensaje(texto, tipo) {
   contentDiv.className = 'message-content';
   
   const pElement = document.createElement('p');
-  pElement.innerText = texto;
+  
+  // Si es HTML, usa innerHTML; si no, usa innerText (seguro contra XSS)
+  if (esHTML) {
+    pElement.innerHTML = texto;
+  } else {
+    pElement.innerText = texto;
+  }
   
   contentDiv.appendChild(pElement);
   messageDiv.appendChild(contentDiv);
