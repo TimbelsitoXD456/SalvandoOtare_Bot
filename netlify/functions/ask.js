@@ -171,7 +171,7 @@ FORMATO DE RESPUESTAS:
           }
         ],
         generationConfig: {
-          maxOutputTokens: 2048
+          maxOutputTokens: 8192
         }
       })
     });
