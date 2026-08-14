@@ -21,7 +21,7 @@ async function preguntar() {
   try {
     // Obtener el modelo seleccionado
     const modelSelector = document.getElementById('geminiModel');
-    const modelo = modelSelector ? modelSelector.value : 'gemini-2.5-flash';
+    const modelo = modelSelector ? modelSelector.value : 'gemini-3.5-flash-lite';
     console.log('🔧 Modelo seleccionado:', modelo);
     
     // Obtener el modo de IA seleccionado
