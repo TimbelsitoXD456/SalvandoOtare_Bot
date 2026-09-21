@@ -1,162 +1,178 @@
-async function preguntar() {
-  console.log('🟢 Función preguntar iniciada');
+// Variable global para almacenar el prompt generado
+let promptActual = '';
+
+async function generarPrompt() {
+  console.log('🟢 Función generarPrompt iniciada');
   
-  const inputElement = document.getElementById('pregunta');
-  const pregunta = inputElement.value.trim();
-  console.log('❓ Pregunta ingresada:', pregunta);
+  // Obtener valores del formulario
+  const modelo = document.getElementById('modeloSelector').value;
+  const plan = document.querySelector('input[name="plan"]:checked').value;
+  const tipoTarea = document.getElementById('tipoTarea').value;
+  const descripcion = document.getElementById('descripcionTarea').value.trim();
   
-  if (!pregunta) {
-    console.log('⚠️ Pregunta vacía');
+  console.log('📋 Configuración:', { modelo, plan, tipoTarea, descripcion });
+  
+  // Validar inputs
+  if (!modelo) {
+    mostrarError('Por favor selecciona un modelo de IA');
     return;
   }
   
-  // Agregar mensaje del usuario al chat
-  agregarMensaje(pregunta, 'usuario');
-  inputElement.value = '';
-  inputElement.focus();
+  if (!tipoTarea) {
+    mostrarError('Por favor selecciona el tipo de tarea');
+    return;
+  }
   
-  console.log('⏳ Mostrando indicador de escritura...');
-  agregarIndicadorEscritura();
+  if (!descripcion) {
+    mostrarError('Por favor describe tu tarea');
+    return;
+  }
+  
+  console.log('✅ Validación completada');
+  
+  // Mostrar loading
+  mostrarLoading(true);
+  limpiarError();
   
   try {
-    // Obtener el modelo seleccionado
-    const modelSelector = document.getElementById('geminiModel');
-    const modelo = modelSelector ? modelSelector.value : 'gemini-3.5-flash-lite';
-    console.log('🔧 Modelo seleccionado:', modelo);
-    
-    // Obtener el modo de IA seleccionado
-    const modoSelector = document.getElementById('modoIA');
-    const modo = modoSelector ? modoSelector.value : 'salvandootare';
-    console.log('🎯 Modo de IA seleccionado:', modo);
-    
-    console.log('🌐 Enviando fetch a /.netlify/functions/ask');
-    const res = await fetch('/.netlify/functions/ask', {
+    console.log('🌐 Enviando solicitud a /.netlify/functions/ask');
+    const response = await fetch('/.netlify/functions/ask', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pregunta, modelo, modo })
+      body: JSON.stringify({
+        modelo,
+        plan,
+        tipoTarea,
+        descripcion,
+        esGenerador: true
+      })
     });
     
-    console.log('📡 Estado de respuesta:', res.status, res.statusText);
+    console.log('📡 Estado de respuesta:', response.status);
     
-    // Remover indicador de escritura
-    removerIndicadorEscritura();
-    
-    if (!res.ok) {
-      console.log('❌ Error HTTP:', res.status);
-      agregarMensaje(`❌ Error: ${res.status} - ${res.statusText}`, 'bot');
-      return;
+    if (!response.ok) {
+      throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
     }
     
-    console.log('📦 Parseando JSON de respuesta...');
-    const data = await res.json();
+    const data = await response.json();
     console.log('✅ Datos recibidos:', data);
     
-    let respuestaTexto = data.respuesta || "No se pudo obtener respuesta.";
-    console.log('💬 Respuesta final (sin procesar):', respuestaTexto);
-    
-    // === CONVERTIR MARKDOWN A HTML ===
-    respuestaTexto = convertirMarkdownAHTML(respuestaTexto);
-    
-    console.log('🎨 Agregando respuesta al chat...');
-    agregarMensaje(respuestaTexto, 'bot', true); // true = es HTML
-    
-    console.log('🎉 Proceso completado exitosamente');
-  } catch (error) {
-    console.error('💥 Error en la función:', error);
-    removerIndicadorEscritura();
-    agregarMensaje(`❌ Error: ${error.message}`, 'bot');
-  }
-}
-
-// === NUEVA FUNCIÓN: Convertir Markdown a HTML ===
-function convertirMarkdownAHTML(texto) {
-  // **texto** -> <strong>texto</strong>
-  texto = texto.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  
-  // __texto__ -> <strong>texto</strong>
-  texto = texto.replace(/__(.+?)__/g, '<strong>$1</strong>');
-  
-  // *texto* -> <em>texto</em> (después de ** para evitar conflictos)
-  texto = texto.replace(/\*(.+?)\*/g, '<em>$1</em>');
-  
-  // _texto_ -> <em>texto</em>
-  texto = texto.replace(/_(.+?)_/g, '<em>$1</em>');
-  
-  // # Título -> <h2>Título</h2>
-  texto = texto.replace(/^# (.+)$/gm, '<h2 style="margin-top: 12px; color: #FFD700;">$1</h2>');
-  
-  // ## Subtítulo -> <h3>Subtítulo</h3>
-  texto = texto.replace(/^## (.+)$/gm, '<h3 style="color: #0FF;">$1</h3>');
-  
-  // Saltos de línea \n -> <br>
-  texto = texto.replace(/\n/g, '<br>');
-  
-  return texto;
-}
-
-function agregarMensaje(texto, tipo, esHTML = false) {
-  const chatMessages = document.getElementById('chatMessages');
-  
-  const messageDiv = document.createElement('div');
-  messageDiv.className = `message ${tipo === 'usuario' ? 'user-message' : 'bot-message'}`;
-  
-  const contentDiv = document.createElement('div');
-  contentDiv.className = 'message-content';
-  
-  const pElement = document.createElement('p');
-  
-  // Si es HTML, usa innerHTML; si no, usa innerText (seguro contra XSS)
-  if (esHTML) {
-    pElement.innerHTML = texto;
-  } else {
-    pElement.innerText = texto;
-  }
-  
-  contentDiv.appendChild(pElement);
-  messageDiv.appendChild(contentDiv);
-  chatMessages.appendChild(messageDiv);
-  
-  // Scroll automático al último mensaje
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function agregarIndicadorEscritura() {
-  const chatMessages = document.getElementById('chatMessages');
-  
-  const messageDiv = document.createElement('div');
-  messageDiv.id = 'typing-indicator';
-  messageDiv.className = 'message bot-message';
-  
-  const contentDiv = document.createElement('div');
-  contentDiv.className = 'message-content typing-indicator';
-  
-  for (let i = 0; i < 3; i++) {
-    const dot = document.createElement('div');
-    dot.className = 'typing-dot';
-    contentDiv.appendChild(dot);
-  }
-  
-  messageDiv.appendChild(contentDiv);
-  chatMessages.appendChild(messageDiv);
-  
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function removerIndicadorEscritura() {
-  const indicator = document.getElementById('typing-indicator');
-  if (indicator) {
-    indicator.remove();
-  }
-}
-
-// Permitir enviar con Enter
-document.addEventListener('DOMContentLoaded', function() {
-  const inputElement = document.getElementById('pregunta');
-  
-  inputElement.addEventListener('keypress', function(event) {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      preguntar();
+    if (data.error) {
+      throw new Error(data.error);
     }
+    
+    // Almacenar prompt generado
+    promptActual = data.prompt || data.respuesta || 'No se generó prompt.';
+    
+    // Mostrar prompt en el panel de resultado
+    mostrarResultado(promptActual);
+    
+    // Mostrar botón de copiar
+    document.getElementById('btnCopy').style.display = 'flex';
+    
+    console.log('🎉 Prompt generado exitosamente');
+  } catch (error) {
+    console.error('💥 Error:', error);
+    mostrarError(`Error al generar prompt: ${error.message}`);
+  } finally {
+    mostrarLoading(false);
+  }
+}
+
+function mostrarResultado(prompt) {
+  const container = document.getElementById('resultContainer');
+  
+  container.innerHTML = `
+    <div class="prompt-result">${escaparHTML(prompt)}</div>
+  `;
+  
+  console.log('📝 Resultado mostrado');
+}
+
+function mostrarLoading(show) {
+  const loading = document.getElementById('loadingIndicator');
+  const btn = document.querySelector('.btn-generate');
+  
+  if (show) {
+    loading.style.display = 'flex';
+    btn.disabled = true;
+  } else {
+    loading.style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+function mostrarError(mensaje) {
+  const errorDiv = document.getElementById('errorMessage');
+  errorDiv.textContent = `❌ ${mensaje}`;
+  errorDiv.style.display = 'block';
+  console.error('⚠️ Error mostrado:', mensaje);
+}
+
+function limpiarError() {
+  document.getElementById('errorMessage').style.display = 'none';
+}
+
+function copiarPrompt() {
+  if (!promptActual) {
+    mostrarError('No hay prompt para copiar');
+    return;
+  }
+  
+  console.log('📋 Copiando prompt al portapapeles');
+  
+  navigator.clipboard.writeText(promptActual)
+    .then(() => {
+      console.log('✅ Prompt copiado');
+      
+      // Feedback visual
+      const btn = document.getElementById('btnCopy');
+      const originalText = btn.innerHTML;
+      
+      btn.classList.add('copied');
+      btn.querySelector('.copy-text').textContent = '✅ ¡Copiado!';
+      
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.querySelector('.copy-text').textContent = 'Copiar al portapapeles';
+      }, 2000);
+    })
+    .catch(err => {
+      console.error('❌ Error al copiar:', err);
+      mostrarError('Error al copiar al portapapeles');
+    });
+}
+
+function escaparHTML(texto) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return texto.replace(/[&<>"']/g, m => map[m]);
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('✨ Aplicación cargada');
+  
+  // Permitir Enter en textarea para generar (Ctrl+Enter)
+  const textarea = document.getElementById('descripcionTarea');
+  textarea.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' && event.ctrlKey) {
+      event.preventDefault();
+      generarPrompt();
+    }
+  });
+  
+  // Limpiar error al escribir
+  document.getElementById('modeloSelector').addEventListener('change', limpiarError);
+  document.getElementById('tipoTarea').addEventListener('change', limpiarError);
+  textarea.addEventListener('input', limpiarError);
+  
+  document.querySelectorAll('input[name="plan"]').forEach(radio => {
+    radio.addEventListener('change', limpiarError);
   });
 });
