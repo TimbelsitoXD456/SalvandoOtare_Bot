@@ -3,51 +3,136 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IA Ayuda SalvandoOtare</title>
+  <title>Generador de Prompts - IA Intelligence</title>
   <link href="style.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
-    <div class="chat-header">
+    <!-- Header -->
+    <div class="header">
       <div class="header-content">
-        <div class="bot-avatar">🤖</div>
-        <div class="header-info">
-          <h1>SalvandoOtare Bot</h1>
-          <p>Siempre disponible para ayudarte</p>
+        <div class="logo">
+          <span class="logo-icon">⚡</span>
+          <div class="logo-text">
+            <h1>PromptGenerator</h1>
+            <p>Prompts optimizados para cualquier IA</p>
+          </div>
         </div>
-        <div class="mode-selector">
-          <label for="modoIA">Modo:</label>
-          <select id="modoIA" class="mode-dropdown">
-            <option value="salvandootare">🎮 L.O - SalvandoOtare</option>
-            <option value="general">🤖 IA General</option>
+        <div class="header-badge">v1.0</div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Left Panel: Configuración -->
+      <div class="config-panel">
+        <h2>Configurar Prompt</h2>
+
+        <!-- Selector de Modelo -->
+        <div class="config-section">
+          <label class="section-label">Modelo de IA</label>
+          <select id="modeloSelector" class="selector-dropdown">
+            <option value="">-- Selecciona un modelo --</option>
+            <option value="chatgpt">ChatGPT (OpenAI)</option>
+            <option value="gemini">Google Gemini</option>
+            <option value="claude">Claude (Anthropic)</option>
+            <option value="groq">Groq</option>
+            <option value="meta">Meta IA (Llama)</option>
+            <option value="canva">Canva IA</option>
           </select>
         </div>
-      </div>
-    </div>
 
-    <div class="chat-messages" id="chatMessages">
-      <div class="message bot-message">
-        <div class="message-content">
-          <p>¡Hola! 👋 Soy tu asistente inteligente. Puedo ayudarte como <strong>L.O</strong> (experta en SalvandoOtare) o como una <strong>IA General</strong>. ¿Qué necesitas?</p>
+        <!-- Selector de Plan -->
+        <div class="config-section">
+          <label class="section-label">Plan / Nivel</label>
+          <div class="plan-selector">
+            <label class="plan-option">
+              <input type="radio" name="plan" value="free" checked>
+              <span class="plan-label">
+                <span class="plan-name">Free</span>
+                <span class="plan-desc">Prompts básicos</span>
+              </span>
+            </label>
+            <label class="plan-option">
+              <input type="radio" name="plan" value="pro">
+              <span class="plan-label">
+                <span class="plan-name">Pro</span>
+                <span class="plan-desc">Detallados</span>
+              </span>
+            </label>
+            <label class="plan-option">
+              <input type="radio" name="plan" value="premium">
+              <span class="plan-label">
+                <span class="plan-name">Premium</span>
+                <span class="plan-desc">Muy complejos</span>
+              </span>
+            </label>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <div class="chat-input-area">
-      <div class="input-wrapper">
-        <input 
-          id="pregunta" 
-          type="text" 
-          class="chat-input" 
-          placeholder="Escribe tu pregunta aquí..." 
-          autocomplete="off"
-        />
-        <button class="send-btn" onclick="preguntar()">
-          <span>📤</span>
+        <!-- Tipo de Tarea -->
+        <div class="config-section">
+          <label for="tipoTarea" class="section-label">Tipo de Tarea</label>
+          <select id="tipoTarea" class="selector-dropdown">
+            <option value="">-- Selecciona tipo --</option>
+            <option value="creativo">🎨 Creativo</option>
+            <option value="tecnico">💻 Técnico / Código</option>
+            <option value="academico">📚 Académico</option>
+            <option value="negocios">💼 Negocios</option>
+            <option value="analisis">📊 Análisis / Investigación</option>
+            <option value="redaccion">✍️ Redacción / Contenido</option>
+          </select>
+        </div>
+
+        <!-- Input de Tarea -->
+        <div class="config-section">
+          <label for="descripcionTarea" class="section-label">Describe tu tarea</label>
+          <textarea 
+            id="descripcionTarea" 
+            class="task-input" 
+            placeholder="Ejemplo: Quiero un prompt para generar código en Python que..."
+            rows="5"
+          ></textarea>
+        </div>
+
+        <!-- Botón Generar -->
+        <button class="btn-generate" onclick="generarPrompt()">
+          <span class="btn-icon">✨</span>
+          <span class="btn-text">Generar Prompt</span>
         </button>
       </div>
-      <p class="footer-text">Powered by Gemini</p>
+
+      <!-- Right Panel: Resultado -->
+      <div class="result-panel">
+        <div class="result-container" id="resultContainer">
+          <div class="result-placeholder">
+            <div class="placeholder-icon">📝</div>
+            <h3>Tu prompt aparecerá aquí</h3>
+            <p>Selecciona un modelo, plan y describe tu tarea, luego presiona "Generar Prompt"</p>
+          </div>
+        </div>
+
+        <!-- Botón Copiar -->
+        <button class="btn-copy" id="btnCopy" onclick="copiarPrompt()" style="display: none;">
+          <span class="copy-icon">📋</span>
+          <span class="copy-text">Copiar al portapapeles</span>
+        </button>
+
+        <!-- Indicador de Carga -->
+        <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+          <div class="spinner"></div>
+          <p>Generando prompt optimizado...</p>
+        </div>
+
+        <!-- Mensaje de Error -->
+        <div class="error-message" id="errorMessage" style="display: none;"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Powered by Gemini 3.5 Flash-Lite | Optimizador de Prompts Inteligente</p>
     </div>
   </div>
 
